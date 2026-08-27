@@ -1,0 +1,40 @@
+# Example campaign config — copy to campaign.yaml and adjust for your staging environment.
+#
+# target_url: base URL of the app under test (never production unless you own it)
+# bot_count: total simulated users for this campaign
+# group_size: browser contexts per worker process (~5 default)
+# duration_ms: optional wall-clock limit; omit to run until `legion stop`
+# think_time_ms: pause between actions (not included in latency_ms)
+# campaign_type: collision | growth | traffic_scale (see architecture.md §10)
+# personas: which persona modules run and action weights within each
+# accounts.seed_file: JSON array of { username, password, role? } — one entry per bot
+# log.directory: where JSONL action logs are written
+
+target_url: https://staging.example.com
+bot_count: 10
+group_size: 5
+duration_ms: 86400000 # 24 hours
+
+think_time_ms:
+  min_ms: 2000
+  max_ms: 8000
+
+campaign_type: collision
+
+personas:
+  - name: issue-tracker
+    weight: 1
+    actions:
+      create_issue: 3
+      add_comment: 2
+      move_card: 1
+
+accounts:
+  seed_file: config/accounts.example.json
+
+log:
+  sink: jsonl
+  directory: .legion/logs
+
+control:
+  flag_file: .legion/stop

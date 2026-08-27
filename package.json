@@ -1,0 +1,40 @@
+{
+  "name": "legion",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Continuous multi-user browser simulation and observability tool",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=9"
+  },
+  "packageManager": "pnpm@9.15.5",
+  "scripts": {
+    "build": "tsc --build",
+    "typecheck": "tsc --build --pretty false",
+    "clean": "tsc --build --clean",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "pnpm run lint && pnpm run format:check && pnpm run typecheck",
+    "prepare": "husky"
+  },
+  "dependencies": {
+    "playwright": "^1.55.0",
+    "yaml": "^2.8.1",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.34.0",
+    "@types/node": "^24.3.0",
+    "eslint": "^9.34.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
+    "husky": "^9.1.7",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.41.0"
+  }
+}

@@ -6,7 +6,7 @@ Sustained multi-user browser simulation for staging environments. Legion drives 
 
 ## Status
 
-Early Phase 1 - public contracts, campaign loader, JSONL log sink, and the single-bot engine action loop are in place. The supervisor is not implemented yet.
+Early Phase 1. Public contracts, campaign loader, JSONL log sink, the single-bot action loop, and grouped browser contexts are in place. The supervisor is not implemented yet.
 
 See `[architecture.md](architecture.md)` for the full design, roadmap, and conventions.
 
@@ -21,7 +21,7 @@ See `[architecture.md](architecture.md)` for the full design, roadmap, and conve
 pnpm install
 ```
 
-Install Playwright browsers for the engine prove script:
+Install Playwright browsers for the engine prove scripts:
 
 ```bash
 pnpm exec playwright install chromium

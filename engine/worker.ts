@@ -68,11 +68,11 @@ export async function runWorker(options: RunWorkerOptions): Promise<void> {
           const page = await context.newPage();
           await runBotLoop(loopOptions(page, bot, options));
         } finally {
-          await context.close();
+          await context.close().catch(() => undefined);
         }
       }),
     );
   } finally {
-    await browser.close();
+    await browser.close().catch(() => undefined);
   }
 }

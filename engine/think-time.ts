@@ -12,8 +12,22 @@ export function thinkTimeMs(
   return range.min_ms + Math.floor(random() * span);
 }
 
-export function sleep(ms: number): Promise<void> {
+export function sleep(ms: number, signal?: AbortSignal): Promise<void> {
+  if (signal?.aborted === true) {
+    return Promise.resolve();
+  }
+
   return new Promise((resolve) => {
-    setTimeout(resolve, ms);
+    const timer = setTimeout(() => {
+      signal?.removeEventListener("abort", onAbort);
+      resolve();
+    }, ms);
+
+    const onAbort = (): void => {
+      clearTimeout(timer);
+      resolve();
+    };
+
+    signal?.addEventListener("abort", onAbort, { once: true });
   });
 }

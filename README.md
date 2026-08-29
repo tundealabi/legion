@@ -6,9 +6,17 @@ Sustained multi-user browser simulation for staging environments. Legion drives 
 
 ## Status
 
-Early Phase 1. Public contracts, campaign loader, JSONL log sink, the single-bot action loop, and grouped browser contexts are in place. The supervisor is not implemented yet.
+Early Phase 1. Public contracts, campaign loader, JSONL sink, bot loop, grouped contexts, and the supervisor CLI are in place. Stats and issue-tracker personas are not.
 
 See `[architecture.md](architecture.md)` for the full design, roadmap, and conventions.
+
+After `pnpm run build`:
+
+```bash
+node dist/supervisor/cli.js start -c config/campaign.yaml
+```
+
+`stop` and `scale <n>` take the same `-c` flag. They write the campaign flag file. Stub bots hit `about:blank` until personas exist. Need at least `bot_count` entries in the accounts seed file.
 
 ## Requirements
 
@@ -21,7 +29,7 @@ See `[architecture.md](architecture.md)` for the full design, roadmap, and conve
 pnpm install
 ```
 
-Install Playwright browsers for the engine prove scripts:
+Install Playwright browsers for the engine and supervisor prove scripts:
 
 ```bash
 pnpm exec playwright install chromium

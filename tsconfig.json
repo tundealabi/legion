@@ -20,7 +20,8 @@
     "contracts/**/*.ts",
     "config/**/*.ts",
     "logging/**/*.ts",
-    "engine/**/*.ts"
+    "engine/**/*.ts",
+    "supervisor/**/*.ts"
   ],
   "exclude": ["node_modules", "dist"]
 }

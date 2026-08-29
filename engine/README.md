@@ -16,7 +16,7 @@ await runWorker({
 - `runWorker` launches one headless Chromium, one context per bot, and runs `runBotLoop` concurrently. One crash of that process takes the whole group.
 - `pickAction` walks cumulative weights. An empty table throws. `runWorker` throws if `bots` is empty.
 - Think-time is not included in `latency_ms`.
-- Failed actions are classified and logged. The loop continues until `maxActions` or `signal` abort.
-- Persona loading, UI login, and the supervisor CLI are not in this slice.
+- Failed actions are classified and logged. The loop continues until `maxActions` or `signal` abort. Default think-time sleep resolves early when `signal` aborts.
+- Persona loading and UI login are not in this slice. The supervisor runs `worker-main` with a stub ping action.
 
 Prove the loop with `node dist/engine/prove-bot-loop.js` after `pnpm run build`. Prove the worker with `node dist/engine/prove-worker.js`.

@@ -19,6 +19,12 @@ export const personaConfigSchema = z.object({
   actions: z.record(z.string().min(1), z.number().positive()),
 });
 
+export const botAccountSchema = z.object({
+  username: z.string().min(1),
+  password: z.string().min(1),
+  role: z.string().min(1).optional(),
+});
+
 export const campaignConfigSchema = z.object({
   target_url: z.string().url(),
   bot_count: z.number().int().positive(),
@@ -47,6 +53,7 @@ export const campaignConfigSchema = z.object({
 
 export type ThinkTimeMs = z.infer<typeof thinkTimeMsSchema>;
 export type PersonaConfig = z.infer<typeof personaConfigSchema>;
+export type BotAccountSeed = z.infer<typeof botAccountSchema>;
 export type CampaignConfig = z.infer<typeof campaignConfigSchema>;
 
 export type CampaignConfigInput = z.input<typeof campaignConfigSchema>;

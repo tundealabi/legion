@@ -1,6 +1,8 @@
 export type { ActionId, BotId } from "./brands.js";
 export { actionId, botId } from "./brands.js";
 export {
+  botAccountSchema,
+  type BotAccountSeed,
   type CampaignConfig,
   type CampaignConfigInput,
   campaignConfigSchema,

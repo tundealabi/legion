@@ -10,6 +10,9 @@
     "pnpm": ">=9"
   },
   "packageManager": "pnpm@9.15.5",
+  "bin": {
+    "legion": "./dist/supervisor/cli.js"
+  },
   "scripts": {
     "build": "tsc --build",
     "typecheck": "tsc --build --pretty false",

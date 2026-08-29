@@ -42,7 +42,8 @@ function readLatencyMs(helpers: ActionHelpers): number {
 export async function runBotLoop(options: RunBotLoopOptions): Promise<void> {
   const now = options.now ?? (() => new Date());
   const random = options.random ?? Math.random;
-  const sleep = options.sleep ?? defaultSleep;
+  const sleep =
+    options.sleep ?? ((ms: number) => defaultSleep(ms, options.signal));
   const memory: BotEntityMemory = { byType: {} };
   const aborted = (): boolean => options.signal?.aborted === true;
 

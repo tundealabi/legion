@@ -6,7 +6,10 @@ import { loadAccounts } from "../config/load-accounts.js";
 import { loadCampaignConfig } from "../config/load-campaign.js";
 import { botId } from "../contracts/brands.js";
 import { createJsonlSink } from "../logging/jsonl-sink.js";
-import { stubPingActions } from "./stub-ping.js";
+import {
+  personaRegistries,
+  resolveCampaignPersonas,
+} from "../personas/index.js";
 import { runWorker } from "./worker.js";
 
 const workerEnvSchema = z.object({
@@ -36,10 +39,14 @@ async function main(): Promise<void> {
   }
 
   const slice = accounts.slice(env.LEGION_BOT_OFFSET, end);
+  const { login, actions } = resolveCampaignPersonas(
+    campaign.personas,
+    personaRegistries,
+  );
   const bots = slice.map((account, index) => ({
     botId: botId(`bot-${String(env.LEGION_BOT_OFFSET + index)}`),
     account,
-    actions: stubPingActions,
+    actions,
   }));
 
   const sink = await createJsonlSink({
@@ -60,6 +67,9 @@ async function main(): Promise<void> {
       thinkTime: campaign.think_time_ms,
       sink,
       signal: controller.signal,
+      onPage: async (page, bot) => {
+        await login(page, bot.account, campaign.target_url);
+      },
     });
   } finally {
     process.off("SIGTERM", onStop);

@@ -21,7 +21,8 @@
     "config/**/*.ts",
     "logging/**/*.ts",
     "engine/**/*.ts",
-    "supervisor/**/*.ts"
+    "supervisor/**/*.ts",
+    "personas/**/*.ts"
   ],
   "exclude": ["node_modules", "dist"]
 }

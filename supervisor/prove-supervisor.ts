@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 
 import { parseLogRecord } from "../contracts/log.js";
 import { sleep } from "../engine/think-time.js";
+import { serveIssueTrackerFixture } from "../personas/serve-fixture.js";
 
 const cliPath = fileURLToPath(new URL("./cli.js", import.meta.url));
 
@@ -109,19 +110,22 @@ async function main(): Promise<void> {
   const accountsPath = path.join(directory, "accounts.json");
   const logDirectory = path.join(directory, "logs");
   const flagFile = path.join(directory, "stop");
+  const supervisorLog = path.join(logDirectory, "supervisor.jsonl");
 
-  await writeFile(
-    accountsPath,
-    `${JSON.stringify([
-      { username: "bot-a", password: "prove" },
-      { username: "bot-b", password: "prove" },
-    ])}\n`,
-    "utf8",
-  );
+  const fixture = await serveIssueTrackerFixture();
+  try {
+    await writeFile(
+      accountsPath,
+      `${JSON.stringify([
+        { username: "bot-a", password: "prove" },
+        { username: "bot-b", password: "prove" },
+      ])}\n`,
+      "utf8",
+    );
 
-  await writeFile(
-    campaignPath,
-    `target_url: https://example.com
+    await writeFile(
+      campaignPath,
+      `target_url: ${JSON.stringify(fixture.url)}
 bot_count: 2
 group_size: 2
 think_time_ms:
@@ -129,10 +133,10 @@ think_time_ms:
   max_ms: 0
 campaign_type: collision
 personas:
-  - name: stub
+  - name: issue-tracker
     weight: 1
     actions:
-      ping: 1
+      create_issue: 1
 accounts:
   seed_file: ${JSON.stringify(accountsPath)}
 log:
@@ -141,41 +145,43 @@ log:
 control:
   flag_file: ${JSON.stringify(flagFile)}
 `,
-    "utf8",
-  );
+      "utf8",
+    );
 
-  const start = spawn(
-    process.execPath,
-    [cliPath, "start", "-c", campaignPath],
-    {
-      stdio: "inherit",
-    },
-  );
-  const startExit = waitExit(start);
-  const supervisorLog = path.join(logDirectory, "supervisor.jsonl");
-
-  try {
-    await waitForEvent(supervisorLog, "worker_started", 60_000);
-    await waitForActionLog(path.join(logDirectory, "worker-0.jsonl"), 60_000);
-    const stop = spawn(
+    const start = spawn(
       process.execPath,
-      [cliPath, "stop", "-c", campaignPath],
+      [cliPath, "start", "-c", campaignPath],
       {
         stdio: "inherit",
       },
     );
-    const stopped = await waitExit(stop);
-    if (stopped.code !== 0) {
-      throw new Error(`legion stop exited ${String(stopped.code)}`);
+    const startExit = waitExit(start);
+
+    try {
+      await waitForEvent(supervisorLog, "worker_started", 60_000);
+      await waitForActionLog(path.join(logDirectory, "worker-0.jsonl"), 60_000);
+      const stop = spawn(
+        process.execPath,
+        [cliPath, "stop", "-c", campaignPath],
+        {
+          stdio: "inherit",
+        },
+      );
+      const stopped = await waitExit(stop);
+      if (stopped.code !== 0) {
+        throw new Error(`legion stop exited ${String(stopped.code)}`);
+      }
+      const finished = await startExit;
+      if (finished.code !== 0) {
+        throw new Error(`legion start exited ${String(finished.code)}`);
+      }
+    } catch (error: unknown) {
+      start.kill("SIGTERM");
+      await startExit.catch(() => undefined);
+      throw error;
     }
-    const finished = await startExit;
-    if (finished.code !== 0) {
-      throw new Error(`legion start exited ${String(finished.code)}`);
-    }
-  } catch (error: unknown) {
-    start.kill("SIGTERM");
-    await startExit.catch(() => undefined);
-    throw error;
+  } finally {
+    await fixture.close().catch(() => undefined);
   }
 
   const events = supervisorEvents(await readFile(supervisorLog, "utf8"));

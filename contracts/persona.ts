@@ -56,6 +56,19 @@ export type PersonaAction = (
 /** Persona modules export named actions; YAML assigns weights at runtime. */
 export type PersonaActionRegistry = Record<string, PersonaAction>;
 
+/** UI login once per browser context. Not a weighted campaign action. */
+export type PersonaLogin = (
+  page: Page,
+  account: BotAccount,
+  targetUrl: string,
+) => Promise<void>;
+
+/** One target-app module: login plus the action map YAML can name. */
+export interface PersonaModule {
+  readonly login: PersonaLogin;
+  readonly actions: PersonaActionRegistry;
+}
+
 export interface ResolvedPersonaAction {
   name: string;
   weight: number;

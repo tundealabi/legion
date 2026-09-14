@@ -46,6 +46,8 @@ export {
   type LatencyBracket,
   type PersonaAction,
   type PersonaActionRegistry,
+  type PersonaLogin,
+  type PersonaModule,
   type ResolvedPersonaAction,
   stubHotPool,
 } from "./persona.js";

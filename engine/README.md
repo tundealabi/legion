@@ -17,6 +17,6 @@ await runWorker({
 - `pickAction` walks cumulative weights. An empty table throws. `runWorker` throws if `bots` is empty.
 - Think-time is not included in `latency_ms`.
 - Failed actions are classified and logged. The loop continues until `maxActions` or `signal` abort. Default think-time sleep resolves early when `signal` aborts.
-- Persona loading and UI login are not in this slice. The supervisor runs `worker-main` with a stub ping action.
+- `runWorker` accepts `onPage` so a worker can log in (or otherwise set up) before the action loop. `worker-main` resolves login and actions from `campaign.personas`, then runs them against `target_url`.
 
 Prove the loop with `node dist/engine/prove-bot-loop.js` after `pnpm run build`. Prove the worker with `node dist/engine/prove-worker.js`.

@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Legion issue-tracker fixture</title>
+  </head>
+  <body>
+    <section id="login">
+      <h1>Sign in</h1>
+      <label>
+        Username
+        <input data-testid="login-username" />
+      </label>
+      <label>
+        Password
+        <input data-testid="login-password" type="password" />
+      </label>
+      <button type="button" id="sign-in">Sign in</button>
+    </section>
+
+    <section id="board" data-testid="board" hidden>
+      <h1>Board</h1>
+      <button type="button" id="create-issue">Create issue</button>
+      <div id="issue-form" hidden>
+        <label>
+          Title
+          <input data-testid="issue-title" />
+        </label>
+        <button type="button" id="save-issue">Save issue</button>
+      </div>
+      <div style="display: flex; gap: 1rem">
+        <div>
+          <h2>Todo</h2>
+          <div data-testid="column-todo"></div>
+        </div>
+        <div>
+          <h2>In progress</h2>
+          <div data-testid="column-in-progress"></div>
+        </div>
+        <div>
+          <h2>Done</h2>
+          <div data-testid="column-done"></div>
+        </div>
+      </div>
+      <div id="issue-detail" hidden>
+        <label>
+          Status
+          <select data-testid="issue-status">
+            <option value="todo">todo</option>
+            <option value="in_progress">in_progress</option>
+            <option value="done">done</option>
+          </select>
+        </label>
+        <label>
+          Comment
+          <input data-testid="comment-body" />
+        </label>
+        <button type="button" id="add-comment">Add comment</button>
+        <ul data-testid="comment-list"></ul>
+      </div>
+    </section>
+
+    <script>
+      const storageKey = "legion-issue-tracker-fixture";
+
+      function loadState() {
+        const raw = sessionStorage.getItem(storageKey);
+        if (raw === null) {
+          return { authed: false, nextId: 1, issues: [], selectedId: null };
+        }
+        return JSON.parse(raw);
+      }
+
+      function saveState(state) {
+        sessionStorage.setItem(storageKey, JSON.stringify(state));
+      }
+
+      let state = loadState();
+
+      const loginEl = document.getElementById("login");
+      const boardEl = document.getElementById("board");
+      const formEl = document.getElementById("issue-form");
+      const titleEl = document.querySelector('[data-testid="issue-title"]');
+      const detailEl = document.getElementById("issue-detail");
+      const statusEl = document.querySelector('[data-testid="issue-status"]');
+      const commentEl = document.querySelector('[data-testid="comment-body"]');
+      const commentListEl = document.querySelector(
+        '[data-testid="comment-list"]',
+      );
+
+      function selectedIssue() {
+        return state.issues.find((issue) => issue.id === state.selectedId);
+      }
+
+      function render() {
+        loginEl.hidden = state.authed;
+        boardEl.hidden = !state.authed;
+        const columns = {
+          todo: document.querySelector('[data-testid="column-todo"]'),
+          in_progress: document.querySelector(
+            '[data-testid="column-in-progress"]',
+          ),
+          done: document.querySelector('[data-testid="column-done"]'),
+        };
+        for (const column of Object.values(columns)) {
+          column.replaceChildren();
+        }
+        for (const issue of state.issues) {
+          const row = document.createElement("article");
+          row.setAttribute("data-testid", "issue-row");
+          row.setAttribute("data-issue-id", issue.id);
+          const button = document.createElement("button");
+          button.type = "button";
+          button.setAttribute("data-testid", "issue-" + issue.id);
+          button.textContent = issue.title;
+          button.addEventListener("click", () => {
+            state.selectedId = issue.id;
+            saveState(state);
+            render();
+          });
+          row.appendChild(button);
+          columns[issue.status].appendChild(row);
+        }
+
+        const issue = selectedIssue();
+        if (issue === undefined) {
+          detailEl.hidden = true;
+          return;
+        }
+        detailEl.hidden = false;
+        statusEl.value = issue.status;
+        commentListEl.replaceChildren();
+        for (const body of issue.comments) {
+          const item = document.createElement("li");
+          item.textContent = body;
+          commentListEl.appendChild(item);
+        }
+      }
+
+      document.getElementById("sign-in").addEventListener("click", () => {
+        state.authed = true;
+        saveState(state);
+        render();
+      });
+
+      document.getElementById("create-issue").addEventListener("click", () => {
+        formEl.hidden = false;
+        titleEl.value = "";
+        titleEl.focus();
+      });
+
+      document.getElementById("save-issue").addEventListener("click", () => {
+        const title = titleEl.value;
+        const issue = {
+          id: "iss-" + String(state.nextId),
+          title,
+          status: "todo",
+          comments: [],
+        };
+        state.nextId += 1;
+        state.issues.push(issue);
+        state.selectedId = issue.id;
+        formEl.hidden = true;
+        saveState(state);
+        render();
+      });
+
+      statusEl.addEventListener("change", () => {
+        const issue = selectedIssue();
+        if (issue === undefined) {
+          return;
+        }
+        issue.status = statusEl.value;
+        saveState(state);
+        render();
+      });
+
+      document.getElementById("add-comment").addEventListener("click", () => {
+        const issue = selectedIssue();
+        if (issue === undefined) {
+          return;
+        }
+        issue.comments.push(commentEl.value);
+        commentEl.value = "";
+        saveState(state);
+        render();
+      });
+
+      render();
+    </script>
+  </body>
+</html>

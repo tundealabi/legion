@@ -23,6 +23,7 @@ export interface RunWorkerOptions {
   maxActions?: number;
   now?: () => Date;
   sleep?: (ms: number) => Promise<void>;
+  onPage?: (page: Page, bot: WorkerBot) => Promise<void>;
 }
 
 function loopOptions(
@@ -66,6 +67,9 @@ export async function runWorker(options: RunWorkerOptions): Promise<void> {
         const context = await browser.newContext();
         try {
           const page = await context.newPage();
+          if (options.onPage !== undefined) {
+            await options.onPage(page, bot);
+          }
           await runBotLoop(loopOptions(page, bot, options));
         } finally {
           await context.close().catch(() => undefined);

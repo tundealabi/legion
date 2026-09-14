@@ -6,7 +6,7 @@ Sustained multi-user browser simulation for staging environments. Legion drives 
 
 ## Status
 
-Early Phase 1. Public contracts, campaign loader, JSONL sink, bot loop, grouped contexts, supervisor CLI, and JSONL stats are in place. Issue-tracker personas are not.
+Early Phase 1. Contracts, campaign loader, JSONL sink, bot loop, grouped contexts, supervisor CLI, JSONL stats, and issue-tracker personas are in place. Redis and the oracle are not.
 
 See `[architecture.md](architecture.md)` for the full design, roadmap, and conventions.
 
@@ -16,7 +16,7 @@ After `pnpm run build`:
 node dist/supervisor/cli.js start -c config/campaign.yaml
 ```
 
-`stop` and `scale <n>` take the same `-c` flag. They write the campaign flag file. Stub bots hit `about:blank` until personas exist. Need at least `bot_count` entries in the accounts seed file.
+`stop` and `scale <n>` take the same `-c` flag. They write the campaign flag file. Bots log in through the target app's UI and run issue-tracker actions (`create_issue`, `add_comment`, `move_card`). Need at least `bot_count` entries in the accounts seed file. The app must match the locators in `personas/issue-tracker/`.
 
 After a run, `node dist/logging/stats-main.js <log-directory>` prints actions/sec, error rates, and p95 latency from the JSONL files.
 
